@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "fieldshift"
+version = "0.1.0"
+description = ""
+authors = ["fergus <fergusfettes@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10,<3.13"
+diff-match-patch = "^20230430"
+rich = "^13.7.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
