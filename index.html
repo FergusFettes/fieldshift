@@ -17,48 +17,21 @@
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch_uncompressed.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const apiUrl = 'https://huggingface.co/datasets/levinlab/neuroscience-to-dev-bio/raw/main/validation.csv';
+document.addEventListener('DOMContentLoaded', function() {
+  function loadAndDisplayCSV(apiUrl) {
     const diffsContainer = document.getElementById('diffs');
 
     fetch(apiUrl)
       .then(response => response.text())
       .then(csv => {
-        // Function to parse CSV considering commas within quotes
-        function parseCSV(text) {
-          const rows = text.split('\n');
-          return rows.map(row => {
-            let values = [];
-            let value = '';
-            let insideQuote = false;
-            for (let char of row) {
-              if (char === '"' && insideQuote) {
-                insideQuote = false;
-              } else if (char === '"' && !insideQuote) {
-                insideQuote = true;
-              } else if (char === ',' && !insideQuote) {
-                values.push(value);
-                value = '';
-              } else {
-                value += char;
-              }
-            }
-            values.push(value); // Push the last value
-            return values;
-          });
-        }
-
-        // Use the parseCSV function to process the CSV data
         const dmp = new diff_match_patch();
         const rows = parseCSV(csv).slice(1); // Skip header
-        rows.forEach(columns => {
+        const halfRows = rows.slice(0, Math.ceil(rows.length / 2)); // Take only the first half of the rows
+        halfRows.forEach(columns => {
           const before = columns[1];
           const after = columns[2];
           const diff = dmp.diff_main(before, after);
           dmp.diff_cleanupSemantic(diff);
-
-          console.log(before)
-          console.log(after)
 
           const beforeText = [];
           const afterText = [];
@@ -74,14 +47,52 @@
             }
           });
 
-          console.log(beforeText)
           diffsContainer.innerHTML += '<div class="diff-container"><p class="diff before-text">' + beforeText.join('') + '</p><p class="diff after-text">' + afterText.join('') + '</p></div>';
-
         });
       })
-      .catch(error => console.error('Error fetching data:', error));
+      .catch(error => {
+        console.error('Error fetching data from URL:', apiUrl);
+        if (error instanceof Error) { // Check if error is an instance of Error
+          console.error('Error message:', error.message);
+        } else {
+          console.error('Error:', error);
+        }
+      });
+  }
 
+  // Function to parse CSV considering commas within quotes
+  function parseCSV(text) {
+    const rows = text.split('\n');
+    return rows.map(row => {
+      let values = [];
+      let value = '';
+      let insideQuote = false;
+      for (let char of row) {
+        if (char === '"' && insideQuote) {
+          insideQuote = false;
+        } else if (char === '"' && !insideQuote) {
+          insideQuote = true;
+        } else if (char === ',' && !insideQuote) {
+          values.push(value);
+          value = '';
+        } else {
+          value += char;
+        }
+      }
+      values.push(value); // Push the last value
+      return values;
     });
+  }
+
+  // Example CSV URLs
+  const csvUrls = [
+    'https://huggingface.co/datasets/levinlab/neuroscience-to-dev-bio/raw/main/validation.csv',
+    'https://huggingface.co/datasets/levinlab/neuroscience-to-dev-bio/raw/main/training.csv',
+  ];
+
+  // Load and display each CSV
+  csvUrls.forEach(url => loadAndDisplayCSV(url));
+});
 
 </script>
 </head>
