@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10,<3.13"
 diff-match-patch = "^20230430"
 rich = "^13.7.0"
+ipdb = "^0.13.13"
 
 
 [build-system]
